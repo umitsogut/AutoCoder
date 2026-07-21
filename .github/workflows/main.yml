@@ -5,6 +5,7 @@ on:
     types:
       - opened
       - reopened
+      - labeled
 
 jobs:
   autocoder:
@@ -12,8 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -21,7 +21,7 @@ jobs:
       - name: Make script executable
         run: chmod +x scripts/script.sh
 
-      - name: Generate Code with ChatGPT
+      - name: Generate Code
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: autocoder-artifact
-          path: autocoder-bot/
+          path: autocoder-bot
 
       - name: Download Artifact
         uses: actions/download-artifact@v4
