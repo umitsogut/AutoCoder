@@ -7,18 +7,23 @@ on:
       - reopened
       - labeled
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   autocoder:
     if: contains(github.event.issue.labels.*.name, 'autocoder-bot')
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Make script executable
+      - name: Make Script Executable
         run: chmod +x scripts/script.sh
 
       - name: Generate Code
@@ -34,17 +39,24 @@ jobs:
             "$ISSUE_NUMBER" \
             "$OPENAI_API_KEY"
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: autocoder-artifact
-          path: autocoder-bot
+      - name: Configure Git
+        run: |
+          git config user.name "autocoder-bot"
+          git config user.email "actions@github.com"
 
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: autocoder-artifact
-          path: autocoder-artifact
+      - name: Commit Generated Code
+        run: |
+          git add autocoder-bot
+          git commit -m "Generate code for issue #${{ github.event.issue.number }}" || echo "Nothing to commit"
 
-      - name: List Artifact Contents
-        run: ls -R autocoder-artifact
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: autocoder-branch-${{ github.event.issue.number }}
+          base: main
+          labels: autocoder-bot
+          commit-message: "Generate code for issue #${{ github.event.issue.number }}"
+          title: "Auto-generated code for issue #${{ github.event.issue.number }}"
+          body: |
+            This pull request contains code generated automatically by AutoCoder.
