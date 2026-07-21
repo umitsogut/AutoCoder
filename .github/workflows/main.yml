@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -53,7 +51,3 @@ jobs:
           branch: autocoder-branch-${{ github.event.issue.number }}
           base: main
           labels: autocoder-bot
-          commit-message: "Generate code for issue #${{ github.event.issue.number }}"
-          title: "Auto-generated code for issue #${{ github.event.issue.number }}"
-          body: |
-            This pull request contains code generated automatically by AutoCoder.
