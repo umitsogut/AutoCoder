@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -43,11 +45,6 @@ jobs:
         run: |
           git config user.name "autocoder-bot"
           git config user.email "actions@github.com"
-
-      - name: Commit Generated Code
-        run: |
-          git add autocoder-bot
-          git commit -m "Generate code for issue #${{ github.event.issue.number }}" || echo "Nothing to commit"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
