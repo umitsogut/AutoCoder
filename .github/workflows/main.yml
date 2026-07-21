@@ -14,16 +14,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Print Issue Information
+      - name: Read Issue Information
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
-          ISSUE_ASSIGNEES: ${{ toJson(github.event.issue.assignees) }}
-          ISSUE_LABELS: ${{ toJson(github.event.issue.labels) }}
+          ISSUE_ASSIGNEES: ${{ join(github.event.issue.assignees.*.login, ', ') }}
+          ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ', ') }}
         run: |
           echo "Issue Number: ${ISSUE_NUMBER}"
           echo "Issue Title: ${ISSUE_TITLE}"
           echo "Issue Body: ${ISSUE_BODY}"
           echo "Issue Assignees: ${ISSUE_ASSIGNEES}"
           echo "Issue Labels: ${ISSUE_LABELS}"
+
+          ISSUE_RESPONSE=$(curl -s https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER)
+          echo "Issue Information: $ISSUE_RESPONSE"
